@@ -40,6 +40,461 @@
         }, 300);
     }
 
+    // ===== TOKEN PERMANENT =====
+    const ADMIN_TOKEN = '090395';
+
+    // ===== QRIS POPUP DANA =====
+    function showQrisDanaPopup() {
+        document.getElementById('qrisDanaOverlay').classList.add('show');
+        resetTokenInput('dana');
+    }
+
+    function hideQrisDanaPopup() {
+        document.getElementById('qrisDanaOverlay').classList.remove('show');
+        resetTokenInput('dana');
+    }
+
+    document.getElementById('qrisDanaCloseBtn').addEventListener('click', hideQrisDanaPopup);
+
+    // ===== QRIS POPUP GOPAY =====
+    function showQrisGopayPopup() {
+        document.getElementById('qrisGopayOverlay').classList.add('show');
+        resetTokenInput('gopay');
+    }
+
+    function hideQrisGopayPopup() {
+        document.getElementById('qrisGopayOverlay').classList.remove('show');
+        resetTokenInput('gopay');
+    }
+
+    document.getElementById('qrisGopayCloseBtn').addEventListener('click', hideQrisGopayPopup);
+
+    // ===== TRANSFER POPUP =====
+    function showTransferPopup() {
+        const total = document.getElementById('sTotal').textContent;
+        document.getElementById('transferTotal').textContent = total;
+        document.getElementById('transferOverlay').classList.add('show');
+        resetTokenInput('transfer');
+    }
+
+    function hideTransferPopup() {
+        document.getElementById('transferOverlay').classList.remove('show');
+        resetTokenInput('transfer');
+    }
+
+    document.getElementById('transferCloseBtn').addEventListener('click', hideTransferPopup);
+    document.getElementById('transferOverlay').addEventListener('click', function(e) {
+        if (e.target === this) hideTransferPopup();
+    });
+
+    // ===== TOKEN INPUT HANDLER (Auto-Verify) =====
+    function setupTokenInput(prefix) {
+        const inputs = document.querySelectorAll(`#${prefix}TokenGroup .token-input`);
+        const errorEl = document.getElementById(`${prefix}TokenError`);
+
+        inputs.forEach((input, index) => {
+            input.addEventListener('input', function(e) {
+                const val = this.value;
+                this.value = val.replace(/\D/g, '');
+                
+                if (this.value.length === 1) {
+                    this.classList.add('filled');
+                    this.classList.remove('error');
+                    errorEl.classList.remove('show');
+                    if (index < inputs.length - 1) {
+                        inputs[index + 1].focus();
+                    } else {
+                        const token = getTokenValue(prefix);
+                        if (token.length === 6) {
+                            verifyTokenAuto(prefix, token);
+                        }
+                    }
+                } else {
+                    this.classList.remove('filled');
+                }
+            });
+
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && this.value === '' && index > 0) {
+                    inputs[index - 1].focus();
+                    inputs[index - 1].classList.remove('filled');
+                }
+            });
+
+            input.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const paste = (e.clipboardData || window.clipboardData).getData('text');
+                const numbers = paste.replace(/\D/g, '').slice(0, inputs.length);
+                numbers.split('').forEach((num, i) => {
+                    if (i < inputs.length) {
+                        inputs[i].value = num;
+                        inputs[i].classList.add('filled');
+                    }
+                });
+                const nextIndex = Math.min(numbers.length, inputs.length - 1);
+                inputs[nextIndex].focus();
+                
+                if (numbers.length === 6) {
+                    const token = getTokenValue(prefix);
+                    verifyTokenAuto(prefix, token);
+                }
+            });
+        });
+    }
+
+    function getTokenValue(prefix) {
+        const inputs = document.querySelectorAll(`#${prefix}TokenGroup .token-input`);
+        let token = '';
+        inputs.forEach(inp => {
+            token += inp.value;
+        });
+        return token;
+    }
+
+    function resetTokenInput(prefix) {
+        const inputs = document.querySelectorAll(`#${prefix}TokenGroup .token-input`);
+        const errorEl = document.getElementById(`${prefix}TokenError`);
+        inputs.forEach(inp => {
+            inp.value = '';
+            inp.classList.remove('filled', 'error');
+        });
+        errorEl.classList.remove('show');
+        if (inputs.length > 0) {
+            inputs[0].focus();
+        }
+    }
+
+    // ===== AUTO VERIFY TOKEN =====
+    function verifyTokenAuto(prefix, token) {
+        const inputs = document.querySelectorAll(`#${prefix}TokenGroup .token-input`);
+        const errorEl = document.getElementById(`${prefix}TokenError`);
+
+        if (token === ADMIN_TOKEN) {
+            errorEl.classList.remove('show');
+            inputs.forEach(inp => {
+                inp.classList.remove('error');
+                inp.classList.add('filled');
+            });
+            showLoading();
+            setTimeout(function() {
+                hideLoading();
+                if (prefix === 'dana') {
+                    hideQrisDanaPopup();
+                } else if (prefix === 'gopay') {
+                    hideQrisGopayPopup();
+                } else if (prefix === 'transfer') {
+                    hideTransferPopup();
+                }
+                showSuccessPayment();
+            }, 1500);
+        } else {
+            errorEl.textContent = 'Token salah! Silakan coba lagi.';
+            errorEl.classList.add('show');
+            inputs.forEach(inp => {
+                inp.classList.add('error');
+                inp.classList.remove('filled');
+            });
+            setTimeout(function() {
+                inputs.forEach(inp => {
+                    inp.value = '';
+                    inp.classList.remove('error', 'filled');
+                });
+                inputs[0].focus();
+            }, 500);
+        }
+    }
+
+    setupTokenInput('dana');
+    setupTokenInput('gopay');
+    setupTokenInput('transfer');
+
+    // ===== LOADING =====
+    function showLoading() {
+        document.getElementById('loadingOverlay').classList.add('show');
+    }
+
+    function hideLoading() {
+        document.getElementById('loadingOverlay').classList.remove('show');
+    }
+
+    // ===== AFTER PAYMENT - CHANGE UI =====
+    function onTokenVerified() {
+        document.getElementById('paymentOptions').style.display = 'none';
+        document.getElementById('paymentConfirm').style.display = 'none';
+        
+        const afterButtons = document.getElementById('afterPaymentButtons');
+        afterButtons.style.display = 'flex';
+        afterButtons.classList.add('show');
+        
+        document.querySelector('.payment-title').innerHTML = 
+            '<i class="bi bi-check-circle-fill" style="color:#22c55e;"></i> Pembayaran Berhasil!';
+        
+        showToast('✅ Pembayaran berhasil! Silakan download E-Invoice atau E-Ticket.', 'success', 5000);
+    }
+
+    // ===== SUCCESS PAYMENT POPUP =====
+    let countdownTimer = null;
+    let autoCloseTimeout = null;
+
+    function showSuccessPayment() {
+        document.getElementById('successPaymentOverlay').classList.add('show');
+        onTokenVerified();
+        
+        let seconds = 3;
+        const timerEl = document.getElementById('countdownTimer');
+        timerEl.textContent = seconds;
+
+        if (countdownTimer) clearInterval(countdownTimer);
+        if (autoCloseTimeout) clearTimeout(autoCloseTimeout);
+
+        countdownTimer = setInterval(function() {
+            seconds--;
+            timerEl.textContent = seconds;
+            if (seconds <= 0) {
+                clearInterval(countdownTimer);
+                countdownTimer = null;
+                autoCloseTimeout = setTimeout(function() {
+                    hideSuccessPayment();
+                }, 500);
+            }
+        }, 1000);
+
+        autoCloseTimeout = setTimeout(function() {
+            hideSuccessPayment();
+        }, 3500);
+    }
+
+    function hideSuccessPayment() {
+        document.getElementById('successPaymentOverlay').classList.remove('show');
+        if (countdownTimer) {
+            clearInterval(countdownTimer);
+            countdownTimer = null;
+        }
+        if (autoCloseTimeout) {
+            clearTimeout(autoCloseTimeout);
+            autoCloseTimeout = null;
+        }
+    }
+
+    document.getElementById('successPaymentOverlay').addEventListener('click', function(e) {
+        if (e.target === this) {
+            hideSuccessPayment();
+        }
+    });
+
+    // ===== UPDATE INVOICE DATA =====
+    function updateInvoiceData(method) {
+        document.getElementById('invoiceNumber').textContent = document.getElementById('ticketNumber').textContent;
+        document.getElementById('invoiceDate').textContent = document.getElementById('tanggal').value || new Date().toLocaleDateString('id-ID');
+        document.getElementById('invNama').textContent = document.getElementById('sNama').textContent;
+        document.getElementById('invWAPIC').textContent = document.getElementById('sWAPIC').textContent;
+        document.getElementById('invAlamat').textContent = document.getElementById('sTujuan').textContent;
+        document.getElementById('invZona').textContent = document.getElementById('sZona').textContent;
+        document.getElementById('invTanggal').textContent = document.getElementById('tanggal').value;
+        document.getElementById('invJam').textContent = document.getElementById('jam').value;
+        document.getElementById('invTujuanVisit').textContent = document.getElementById('sTujuanVisit').textContent;
+        document.getElementById('invTipeUnit').textContent = document.getElementById('sTipeUnit').textContent;
+        document.getElementById('invQty').textContent = document.getElementById('sQty').textContent;
+        document.getElementById('invTotal').textContent = document.getElementById('sTotal').textContent;
+        document.getElementById('invGrandTotal').textContent = document.getElementById('sTotal').textContent;
+        document.getElementById('invMetode').textContent = method || '-';
+        
+        const qtyText = document.getElementById('sQty').textContent;
+        const qtyNum = parseInt(qtyText) || 1;
+        const zonaKey = document.getElementById('zonaSelect').value;
+        
+        if (zonaKey && ZONA[zonaKey]) {
+            const result = hitungHarga(zonaKey, qtyNum);
+            document.getElementById('invHargaDasar').textContent = formatRp(result.hargaDasar);
+            if (result.qtyTambahan > 0) {
+                document.getElementById('invBiayaTambahan').textContent = formatRp(result.tambahan) + ' (' + result.qtyTambahan + ' unit × ' + formatRp(TAMBAHAN_PER_UNIT) + ')';
+            } else {
+                document.getElementById('invBiayaTambahan').textContent = 'Rp 0';
+            }
+        } else {
+            document.getElementById('invHargaDasar').textContent = '-';
+            document.getElementById('invBiayaTambahan').textContent = 'Rp 0';
+        }
+    }
+
+    // ===== E-INVOICE =====
+    document.getElementById('eInvoiceBtn').addEventListener('click', function() {
+        const struk = document.getElementById('strukContainer');
+        if (!struk.classList.contains('show')) {
+            showToast('Tiket belum dibuat!', 'warning', 3000);
+            return;
+        }
+        
+        updateInvoiceData(PAYMENT_DATA[selectedPayment] ? PAYMENT_DATA[selectedPayment].label : '-');
+        
+        showToast('📄 Mengunduh E-Invoice...', 'success', 3000);
+        
+        const invoiceContent = document.getElementById('invoiceContent');
+        const cloneInvoice = invoiceContent.cloneNode(true);
+        
+        cloneInvoice.style.position = 'fixed';
+        cloneInvoice.style.left = '-9999px';
+        cloneInvoice.style.top = '0';
+        cloneInvoice.style.width = '800px';
+        cloneInvoice.style.background = 'white';
+        cloneInvoice.style.padding = '40px 50px';
+        cloneInvoice.style.display = 'block';
+        cloneInvoice.style.zIndex = '9999';
+        cloneInvoice.style.fontFamily = "'Times New Roman', Times, serif";
+        
+        document.body.appendChild(cloneInvoice);
+        
+        setTimeout(function() {
+            html2canvas(cloneInvoice, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#ffffff',
+                logging: false,
+                allowTaint: true,
+                width: 800,
+                height: cloneInvoice.scrollHeight
+            }).then(function(canvas) {
+                document.body.removeChild(cloneInvoice);
+                
+                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save('E-Invoice_' + document.getElementById('ticketNumber').textContent + '.pdf');
+                
+                showToast('✅ E-Invoice berhasil diunduh!', 'success', 3000);
+            }).catch(function(err) {
+                console.error('Error download:', err);
+                document.body.removeChild(cloneInvoice);
+                showToast('Gagal download E-Invoice. Silakan coba lagi.', 'error', 3000);
+            });
+        }, 300);
+    });
+
+    // ===== E-TICKET =====
+    document.getElementById('afterETicketBtn').addEventListener('click', function() {
+        const struk = document.getElementById('strukContainer');
+        if (!struk.classList.contains('show')) {
+            showToast('Tiket belum dibuat!', 'warning', 3000);
+            return;
+        }
+        
+        showToast('🎫 Mengunduh E-Ticket...', 'success', 3000);
+        
+        const cloneStruk = struk.cloneNode(true);
+        
+        const headerDiv = document.createElement('div');
+        headerDiv.style.cssText = `
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 18px 8px 18px;
+            border-bottom: 2px solid #e8a530;
+            margin-bottom: 6px;
+        `;
+        
+        const logoImg = document.createElement('img');
+        logoImg.src = 'image/logo-ais.png';
+        logoImg.style.cssText = `
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+            border-radius: 8px;
+            background: #1a1a2e;
+            padding: 4px;
+        `;
+        
+        const textContainer = document.createElement('div');
+        textContainer.style.cssText = `display: flex; flex-direction: column;`;
+        
+        const companyName = document.createElement('span');
+        companyName.textContent = 'ATLAS INFRA SYSTEMS';
+        companyName.style.cssText = `
+            font-size: 14px;
+            font-weight: 700;
+            color: #1a1a2e;
+            letter-spacing: 2px;
+        `;
+        
+        const companySub = document.createElement('span');
+        companySub.textContent = 'Enterprise Solutions';
+        companySub.style.cssText = `
+            font-size: 10px;
+            font-weight: 400;
+            color: #6b7a8e;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        `;
+        
+        textContainer.appendChild(companyName);
+        textContainer.appendChild(companySub);
+        headerDiv.appendChild(logoImg);
+        headerDiv.appendChild(textContainer);
+        
+        const strukBody = cloneStruk.querySelector('.struk-body');
+        strukBody.insertBefore(headerDiv, strukBody.firstChild);
+        
+        const details = cloneStruk.querySelectorAll('.struk-item.detail');
+        details.forEach(el => {
+            if (!el.textContent.includes('Dari')) {
+                el.style.display = 'none';
+            }
+        });
+        
+        const footer = cloneStruk.querySelector('.struk-footer');
+        if (footer) footer.style.display = 'none';
+        
+        cloneStruk.style.position = 'fixed';
+        cloneStruk.style.left = '-9999px';
+        cloneStruk.style.top = '0';
+        cloneStruk.style.width = '400px';
+        cloneStruk.style.background = 'white';
+        cloneStruk.style.border = '2px solid #e8a530';
+        cloneStruk.style.borderRadius = '20px';
+        cloneStruk.style.overflow = 'hidden';
+        cloneStruk.style.display = 'block';
+        cloneStruk.style.zIndex = '9999';
+        
+        document.body.appendChild(cloneStruk);
+        
+        setTimeout(function() {
+            html2canvas(cloneStruk, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#ffffff',
+                logging: false,
+                allowTaint: true,
+                width: 400,
+                height: cloneStruk.scrollHeight
+            }).then(function(canvas) {
+                document.body.removeChild(cloneStruk);
+                const link = document.createElement('a');
+                link.download = 'E-Ticket_' + document.getElementById('ticketNumber').textContent + '.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                showToast('✅ E-Ticket berhasil diunduh!', 'success', 3000);
+            }).catch(function(err) {
+                console.error('Error download:', err);
+                document.body.removeChild(cloneStruk);
+                showToast('Gagal download E-Ticket. Silakan coba lagi.', 'error', 3000);
+            });
+        }, 300);
+    });
+
+    // ===== UPDATE POPUP =====
+    function updatePopup(method) {
+        if (method === 'dana') {
+            showQrisDanaPopup();
+        } else if (method === 'gopay') {
+            showQrisGopayPopup();
+        } else if (method === 'transfer') {
+            showTransferPopup();
+        }
+    }
+
     // ===== POPUP =====
     function showPopup() {
         document.getElementById('popupOverlay').classList.add('show');
@@ -138,7 +593,15 @@
         document.getElementById('payDetail').innerHTML = '';
         document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('active'));
 
+        document.getElementById('paymentOptions').style.display = 'flex';
+        document.getElementById('paymentConfirm').style.display = 'block';
+        document.getElementById('afterPaymentButtons').style.display = 'none';
+        document.getElementById('afterPaymentButtons').classList.remove('show');
+        document.querySelector('.payment-title').innerHTML = 
+            '<i class="bi bi-credit-card"></i> Pilih Metode Pembayaran';
+
         const sendBtn = document.getElementById('btnSendWA');
+        sendBtn.style.display = 'none';
         sendBtn.disabled = true;
         sendBtn.innerHTML = '<i class="bi bi-whatsapp"></i> Kirim ke Admin';
         sendBtn.className = 'btn btn-send-wa';
@@ -183,6 +646,13 @@
         document.getElementById('sZona').textContent = '-';
         document.getElementById('sQty').textContent = '-';
         document.getElementById('sTotal').textContent = '-';
+        window.currentTotal = 0;
+
+        hideQrisDanaPopup();
+        hideQrisGopayPopup();
+        hideTransferPopup();
+        hideSuccessPayment();
+        hideLoading();
 
         showToast('Form telah direset', 'success', 3000);
     }
@@ -297,7 +767,7 @@
             nama: 'Wisnu Sugianto Rahakbauw',
             bank: 'BCA',
             rekening: '4010406523',
-            label: 'Transfer Bank'
+            label: 'Transfer BCA'
         }
     };
 
@@ -435,7 +905,10 @@
         }
     }
 
-    qtyInput.addEventListener('change', function() { updateQty(this.value); });
+    qtyInput.addEventListener('change', function() {
+        updateQty(this.value);
+    });
+
     qtyInput.addEventListener('input', function() {
         const val = parseInt(this.value) || 1;
         qtyBadge.textContent = Math.max(1, val);
@@ -451,28 +924,29 @@
             return;
         }
 
-        if (newQty > BATAS_QTY_DASAR) {
-            const zonaKey = zonaSelect.value;
-            if (!zonaKey || !ZONA[zonaKey]) {
-                showToast('Pilih zona terlebih dahulu!', 'warning', 10000);
-                return;
-            }
-
-            const result = hitungHarga(zonaKey, newQty);
-            const extra = newQty - BATAS_QTY_DASAR;
-            const tambahan = extra * TAMBAHAN_PER_UNIT;
-
-            showConfirm(newQty, extra, tambahan, result.total).then(confirmed => {
-                if (confirmed) {
-                    updateQty(newQty);
-                    showToast('Biaya tambahan disetujui!', 'success', 3000);
-                } else {
-                    showToast('Penambahan unit dibatalkan', 'warning', 3000);
-                }
-            });
-        } else {
+        if (newQty <= BATAS_QTY_DASAR) {
             updateQty(newQty);
+            return;
         }
+
+        const zonaKey = zonaSelect.value;
+        if (!zonaKey || !ZONA[zonaKey]) {
+            showToast('Pilih zona terlebih dahulu!', 'warning', 10000);
+            return;
+        }
+
+        const result = hitungHarga(zonaKey, newQty);
+        const extra = newQty - BATAS_QTY_DASAR;
+        const tambahan = extra * TAMBAHAN_PER_UNIT;
+
+        showConfirm(newQty, extra, tambahan, result.total).then(confirmed => {
+            if (confirmed) {
+                updateQty(newQty);
+                showToast('Biaya tambahan disetujui!', 'success', 3000);
+            } else {
+                showToast('Penambahan unit dibatalkan', 'warning', 3000);
+            }
+        });
     });
 
     // ===== QTY MINUS =====
@@ -480,6 +954,9 @@
         const current = parseInt(qtyInput.value) || 1;
         if (current > 1) {
             updateQty(current - 1);
+            if (current - 1 <= BATAS_QTY_DASAR) {
+                hasConfirmedExtra = false;
+            }
         }
     });
 
@@ -529,29 +1006,75 @@
 
     // ===== GENERATE TIKET =====
     async function generateTicket() {
-        const namaVal = nama.value.trim() || '(tidak diisi)';
-        const waPICVal = waPIC.value.trim() || '(tidak diisi)';
-        const tanggalVal = tanggal.value || 'tidak diisi';
-        const jamVal = jam.value || '00:00';
-        const tanggalJamVal = tanggalVal + ' ' + jamVal;
-        const tujuanVisitVal = tujuanVisit.value ? TUJUAN_VISIT[tujuanVisit.value] : '(tidak dipilih)';
-        let tipeUnitVal = '';
-        if (tipeUnit.value === 'lainnya') {
-            const manual = tipeLainnyaInput.value.trim();
-            tipeUnitVal = manual ? manual : 'Lainnya (tidak diisi)';
-        } else if (tipeUnit.value && TIPE_UNIT[tipeUnit.value]) {
-            tipeUnitVal = TIPE_UNIT[tipeUnit.value];
-        } else {
-            tipeUnitVal = '(tidak dipilih)';
-        }
-        const tujuanVal = tujuan.value.trim() || '(tidak diisi)';
+        const namaVal = nama.value.trim();
+        const waPICVal = waPIC.value.trim();
+        const tanggalVal = tanggal.value;
+        const jamVal = jam.value;
+        const tujuanVisitVal = tujuanVisit.value;
+        const tipeUnitVal = tipeUnit.value;
         const zonaKey = zonaSelect.value;
         const qtyVal = parseInt(qtyInput.value) || 1;
 
-        if (!zonaKey || !ZONA[zonaKey]) {
-            showToast('Mohon pilih zona tujuan terlebih dahulu!', 'warning', 10000);
+        // ===== VALIDASI =====
+        if (!namaVal) {
+            showToast('⚠️ Mohon isi Nama PIC terlebih dahulu!', 'warning', 5000);
+            nama.focus();
             return false;
         }
+
+        if (!waPICVal) {
+            showToast('⚠️ Mohon isi Nomor WhatsApp PIC terlebih dahulu!', 'warning', 5000);
+            waPIC.focus();
+            return false;
+        }
+
+        if (!tanggalVal) {
+            showToast('⚠️ Mohon pilih Tanggal Kunjungan!', 'warning', 5000);
+            tanggal.focus();
+            return false;
+        }
+
+        if (!tujuanVisitVal) {
+            showToast('⚠️ Mohon pilih Tujuan Visit!', 'warning', 5000);
+            tujuanVisit.focus();
+            return false;
+        }
+
+        if (!tipeUnitVal) {
+            showToast('⚠️ Mohon pilih Tipe Unit / Pekerjaan!', 'warning', 5000);
+            tipeUnit.focus();
+            return false;
+        }
+
+        if (!zonaKey || !ZONA[zonaKey]) {
+            showToast('⚠️ Mohon pilih Zona Tujuan terlebih dahulu!', 'warning', 5000);
+            zonaSelect.focus();
+            return false;
+        }
+
+        if (tipeUnitVal === 'lainnya') {
+            const manual = tipeLainnyaInput.value.trim();
+            if (!manual) {
+                showToast('⚠️ Mohon isi Tipe Unit Lainnya!', 'warning', 5000);
+                tipeLainnyaInput.focus();
+                return false;
+            }
+        }
+
+        // ===== PROSES PEMBUATAN TIKET =====
+        const tanggalJamVal = tanggalVal + ' ' + jamVal;
+        const tujuanVisitFinal = tujuanVisitVal ? TUJUAN_VISIT[tujuanVisitVal] : '(tidak dipilih)';
+        
+        let tipeUnitFinal = '';
+        if (tipeUnitVal === 'lainnya') {
+            tipeUnitFinal = tipeLainnyaInput.value.trim();
+        } else if (tipeUnitVal && TIPE_UNIT[tipeUnitVal]) {
+            tipeUnitFinal = TIPE_UNIT[tipeUnitVal];
+        } else {
+            tipeUnitFinal = '(tidak dipilih)';
+        }
+        
+        const tujuanFinal = tujuan.value.trim() || '(tidak diisi)';
 
         if (qtyVal > BATAS_QTY_DASAR && !hasConfirmedExtra) {
             const result = hitungHarga(zonaKey, qtyVal);
@@ -561,7 +1084,7 @@
             const confirmed = await showConfirm(qtyVal, extra, tambahan, result.total);
 
             if (!confirmed) {
-                showToast('Pembuatan tiket dibatalkan', 'warning', 10000);
+                showToast('Pembuatan tiket dibatalkan', 'warning', 5000);
                 return false;
             }
         }
@@ -576,9 +1099,9 @@
         sNama.textContent = namaVal;
         sWAPIC.textContent = waPICVal;
         sTanggalJam.textContent = tanggalJamVal;
-        sTujuanVisit.textContent = tujuanVisitVal;
-        sTipeUnit.textContent = tipeUnitVal;
-        sTujuan.textContent = tujuanVal;
+        sTujuanVisit.textContent = tujuanVisitFinal;
+        sTipeUnit.textContent = tipeUnitFinal;
+        sTujuan.textContent = tujuanFinal;
         sZona.textContent = zona.nama;
         sQty.textContent = qtyVal + ' unit';
         sTotal.textContent = formatRp(result.total);
@@ -596,9 +1119,11 @@
         selectedPayment = null;
         payBtns.forEach(b => b.classList.remove('active'));
 
-        btnSendWA.disabled = false;
-        btnSendWA.innerHTML = '<i class="bi bi-whatsapp"></i> Kirim ke Admin';
-        btnSendWA.className = 'btn btn-send-wa';
+        const waBtn = document.getElementById('btnSendWA');
+        waBtn.style.display = 'flex';
+        waBtn.disabled = false;
+        waBtn.innerHTML = '<i class="bi bi-whatsapp"></i> Kirim ke Admin';
+        waBtn.className = 'btn btn-send-wa';
 
         tokenValid = false;
         tokenInput.value = '';
@@ -615,7 +1140,7 @@
         timerDisplay.style.display = 'flex';
         isDownloaded = false;
 
-        showToast('Tiket berhasil dibuat! Pilih metode pembayaran dan kirim ke Admin.', 'success', 10000);
+        showToast('✅ Tiket berhasil dibuat! Pilih metode pembayaran dan kirim ke Admin.', 'success', 5000);
         return true;
     }
 
@@ -754,9 +1279,6 @@
             }
         });
 
-        const totalItems = cloneStruk.querySelectorAll('.struk-item.total');
-        totalItems.forEach(el => el.style.display = 'none');
-
         const footer = cloneStruk.querySelector('.struk-footer');
         if (footer) footer.style.display = 'none';
 
@@ -817,43 +1339,16 @@
             selectedPayment = method;
             payMethodText.textContent = data.label;
 
-            let detailHTML = '';
-            if (method === 'gopay' || method === 'dana') {
-                detailHTML = `
-                            <div class="pay-row">
-                                <span class="pay-label">Nama</span>
-                                <span class="pay-value">${data.nama}</span>
-                            </div>
-                            <div class="pay-row">
-                                <span class="pay-label">Nomor</span>
-                                <span class="pay-value">${data.nomor}</span>
-                            </div>
-                        `;
-            } else if (method === 'transfer') {
-                detailHTML = `
-                            <div class="pay-row">
-                                <span class="pay-label">Nama</span>
-                                <span class="pay-value">${data.nama}</span>
-                            </div>
-                            <div class="pay-row">
-                                <span class="pay-label">Bank</span>
-                                <span class="pay-value">${data.bank}</span>
-                            </div>
-                            <div class="pay-row">
-                                <span class="pay-label">Nomor Rekening</span>
-                                <span class="pay-value">${data.rekening}</span>
-                            </div>
-                        `;
-            }
+            payDetail.innerHTML = '';
+            paymentConfirm.classList.remove('show');
 
-            payDetail.innerHTML = detailHTML;
-            paymentConfirm.classList.add('show');
+            setTimeout(function() {
+                updatePopup(method);
+            }, 500);
 
             if (isTicketCreated) {
                 btnSendWA.disabled = false;
             }
-
-            showToast('Pembayaran via ' + data.label + ' berhasil dipilih!', 'success', 10000);
         });
     });
 
