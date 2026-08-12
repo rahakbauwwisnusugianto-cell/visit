@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Visit Tiket</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
+    </script>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+    <!-- ===== TOAST ===== -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ===== CUSTOM CONFIRM DIALOG ===== -->
+    <div class="confirm-overlay" id="confirmOverlay">
+        <div class="confirm-box">
+            <div class="confirm-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+            <h3>⚠️ Biaya Tambahan Per Unit</h3>
+            <p>Jumlah unit lebih dari 5 akan dikenakan biaya tambahan.</p>
+            <div class="confirm-detail">
+                <div class="row">
+                    <span class="label">Jumlah Unit</span>
+                    <span class="value highlight" id="confirmQty">0</span>
+                </div>
+                <div class="row">
+                    <span class="label">Unit Tambahan</span>
+                    <span class="value highlight" id="confirmExtra">0</span>
+                </div>
+                <div class="row">
+                    <span class="label">Biaya Tambahan</span>
+                    <span class="value highlight" id="confirmBiaya">Rp 0</span>
+                </div>
+                <div class="row">
+                    <span class="label">Total Biaya</span>
+                    <span class="value highlight" id="confirmTotal">Rp 0</span>
+                </div>
+            </div>
+            <p style="font-size:13px;color:#92400e;">Apakah Anda setuju dengan biaya tambahan ini?</p>
+            <div class="confirm-btns">
+                <button class="btn-confirm yes" id="confirmYes">✅ Ya, Setuju</button>
+                <button class="btn-confirm no" id="confirmNo">❌ Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== POPUP ===== -->
+    <div class="popup-overlay" id="popupOverlay">
+        <div class="popup-content">
+            <div class="popup-icon"><i class="bi bi-check-circle-fill"></i></div>
+            <h3>✅ Tiket Berhasil Diunduh!</h3>
+            <p>
+                <strong>Segera kirim bukti tiket ke Admin</strong> untuk konfirmasi kunjungan.<br /><br />
+                Admin akan memverifikasi dan memproses kunjungan teknisi.
+            </p>
+            <button class="popup-btn" id="popupCloseBtn">Saya Mengerti</button>
+        </div>
+    </div>
+
+    <div class="app-container">
+
+        <!-- HEADER -->
+        <div class="header">
+            <div class="header-top">
+                <div class="header-title">
+                    <i class="bi bi-shield-check logo-icon"></i>
+                    <div>
+                        <h1>Visit Tiket</h1>
+                        <span>Form Kunjungan</span>
+                    </div>
+                </div>
+                <div class="header-badge"><i class="bi bi-patch-check"></i> Bersertifikat</div>
+            </div>
+        </div>
+
+        <!-- BODY -->
+        <div class="body-content">
+
+            <!-- KARTU LOKASI -->
+            <div class="location-card">
+                <div class="location-row">
+                    <div class="icon-circle dark"><i class="bi bi-geo-alt-fill"></i></div>
+                    <div class="loc-content">
+                        <div class="loc-label">Dari (Lokasi Tetap)</div>
+                        <div class="loc-text">
+                            Jl. Batu Ceper VII RT 08 RW 01 No 18
+                            <small>Sawah Besar, Jakarta Pusat</small>
+                            <span class="badge-permanen">PERMANEN</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="location-divider"></div>
+                <div class="location-row">
+                    <div class="icon-circle orange"><i class="bi bi-flag-fill"></i></div>
+                    <div class="loc-content">
+                        <div class="loc-label">Zona Tujuan</div>
+                        <div class="loc-text" id="lokasiTujuan">Pilih zona di bawah</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FORM -->
+            <div class="form-group">
+                <label><i class="bi bi-person-fill"></i> Nama PIC</label>
+                <input type="text" id="nama" placeholder="Masukkan nama PIC" />
+                <div class="input-hint" style="margin-top:4px;">
+                    <i class="bi bi-info-circle"></i> Person In Charge (Penanggung Jawab)
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label><i class="bi bi-whatsapp"></i> Nomor WhatsApp PIC</label>
+                <input type="tel" id="waPIC" placeholder="Contoh: 0812 3456 7890" />
+                <div class="input-hint">
+                    <i class="bi bi-info-circle"></i>
+                    Nomor WhatsApp yang bisa dihubungi
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label><i class="bi bi-calendar3"></i> Tanggal & Jam Kunjungan</label>
+                <div style="display:flex;gap:8px;">
+                    <input type="date" id="tanggal" style="flex:2;" />
+                    <input type="time" id="jam" value="08:00" style="flex:1;" />
+                </div>
+                <div class="input-hint">
+                    <i class="bi bi-info-circle"></i>
+                    Pilih tanggal dan jam kunjungan
+                </div>
+            </div>
+
+            <!-- TUJUAN VISIT -->
+            <div class="form-group">
+                <label>
+                    <i class="bi bi-clipboard-check"></i> Tujuan Visit
+                    <span class="badge-qty" id="tujuanBadge">Pilih</span>
+                </label>
+                <select id="tujuanVisit">
+                    <option value="">-- Pilih Tujuan Visit --</option>
+                    <option value="pengecekan"><i class="bi bi-search bi-option"></i> Pengecekan Unit (Rusak / Mati)</option>
+                    <option value="survei"><i class="bi bi-rulers bi-option"></i> Survei Lokasi Pemasangan</option>
+                    <option value="instalasi"><i class="bi bi-tools bi-option"></i> Instalasi / Pemasangan Baru</option>
+                    <option value="maintenance"><i class="bi bi-wrench bi-option"></i> Maintenance / Perawatan</option>
+                    <option value="konsultasi"><i class="bi bi-chat-dots bi-option"></i> Konsultasi Teknis</option>
+                </select>
+                <div class="input-hint">
+                    <i class="bi bi-info-circle"></i>
+                    Pilih jenis kunjungan yang akan dilakukan
+                </div>
+            </div>
+
+            <!-- TIPE UNIT -->
+            <div class="form-group">
+                <label>
+                    <i class="bi bi-gear-fill"></i> Tipe Unit / Pekerjaan
+                    <span class="badge-qty" id="tipeBadge">Pilih</span>
+                </label>
+                <select id="tipeUnit">
+                    <option value="">-- Pilih Tipe Unit --</option>
+                    <option value="cctv"><i class="bi bi-camera-video-fill bi-option"></i> CCTV</option>
+                    <option value="ac"><i class="bi bi-snowflake bi-option"></i> AC / HVAC</option>
+                    <option value="listrik"><i class="bi bi-lightning-fill bi-option"></i> Kelistrikan &amp; Panel</option>
+                    <option value="server"><i class="bi bi-server bi-option"></i> Server &amp; Jaringan</option>
+                    <option value="telepon"><i class="bi bi-telephone-fill bi-option"></i> Telepon &amp; PABX</option>
+                    <option value="akses"><i class="bi bi-door-open-fill bi-option"></i> Access Control</option>
+                    <option value="fire"><i class="bi bi-fire bi-option"></i> Fire Alarm</option>
+                    <option value="sound"><i class="bi bi-music-note bi-option"></i> Sound System</option>
+                    <option value="lift"><i class="bi bi-arrow-up-short bi-option"></i> Lift / Elevator</option>
+                    <option value="genset"><i class="bi bi-fuel-pump-fill bi-option"></i> Genset / Generator</option>
+                    <option value="pompa"><i class="bi bi-droplet-fill bi-option"></i> Pompa &amp; Plumbing</option>
+                    <option value="struktur"><i class="bi bi-building-fill bi-option"></i> Struktur &amp; Bangunan</option>
+                    <option value="lainnya"><i class="bi bi-plus-circle-fill bi-option"></i> Lainnya (isi manual)</option>
+                </select>
+                <div class="input-hint">
+                    <i class="bi bi-info-circle"></i>
+                    Pilih jenis unit atau pekerjaan yang akan ditangani
+                </div>
+
+                <div class="hidden-form" id="tipeLainnyaForm">
+                    <label><i class="bi bi-pencil-fill"></i> Tulis Tipe Unit / Pekerjaan Lainnya</label>
+                    <input type="text" id="tipeLainnyaInput" placeholder="Contoh: Panel Surya, WiFi, dll." />
+                </div>
+            </div>
+
+            <!-- ALAMAT TUJUAN -->
+            <div class="form-group">
+                <label><i class="bi bi-geo-alt"></i> Alamat Lengkap Tujuan</label>
+                <textarea id="tujuan" placeholder="Masukkan alamat lengkap tujuan (contoh: Jl. Taruna, Sasak Panjang, Bogor)"></textarea>
+                <div class="input-hint">
+                    <i class="bi bi-info-circle"></i>
+                    Alamat detail untuk catatan, tidak mempengaruhi biaya
+                </div>
+            </div>
+
+            <!-- ZONA -->
+            <div class="form-group">
+                <label>
+                    <i class="bi bi-map-fill"></i> Pilih Zona Tujuan
+                    <span class="badge-zona" id="zonaBadge">Zona</span>
+                </label>
+                <select id="zonaSelect">
+                    <option value="">-- Pilih Zona --</option>
+                    <option value="zona1"><i class="bi bi-building bi-option"></i> Zona 1 - Jakarta Pusat &amp; Sekitar</option>
+                    <option value="zona2"><i class="bi bi-building-fill bi-option"></i> Zona 2 - Jakarta Selatan, Timur, Barat</option>
+                    <option value="zona3"><i class="bi bi-house-fill bi-option"></i> Zona 3 - Tangerang, Bekasi, Depok</option>
+                    <option value="zona4"><i class="bi bi-tree-fill bi-option"></i> Zona 4 - Bogor, Cibubur, Cileungsi</option>
+                    <option value="zona5"><i class="bi bi-geo-fill bi-option"></i> Zona 5 - Luar Jabodetabek</option>
+                </select>
+                <div class="input-hint">
+                    <i class="bi bi-info-circle"></i>
+                    Pilih zona untuk menghitung estimasi biaya perjalanan
+                </div>
+            </div>
+
+            <!-- QTY -->
+            <div class="form-group">
+                <label>
+                    <i class="bi bi-boxes"></i> Jumlah Unit / Item yang Dicek
+                    <span class="badge-qty" id="qtyBadge">1</span>
+                </label>
+                <div class="qty-wrapper">
+                    <button class="qty-btn" id="qtyMinus">−</button>
+                    <input type="number" id="qty" value="1" min="1" max="999" />
+                    <button class="qty-btn" id="qtyPlus">+</button>
+                </div>
+                <div class="input-hint">
+                    <i class="bi bi-info-circle"></i>
+                    Masukkan jumlah unit/barang yang akan diinspeksi/dikerjakan
+                </div>
+            </div>
+
+            <!-- KARTU HARGA -->
+            <div class="price-card" id="priceCard">
+                <div class="price-row">
+                    <div>
+                        <div class="price-label"><i class="bi bi-coin"></i> Estimasi Biaya</div>
+                        <div class="price-detail" id="priceDetail">Pilih zona untuk melihat harga</div>
+                    </div>
+                    <div class="price-value" id="priceDisplay">Rp -</div>
+                </div>
+                <div class="price-breakdown">
+                    <span id="breakdownZona">Zona: -</span>
+                    <span id="breakdownQty">Unit: 1</span>
+                    <span id="breakdownTotal">Total: -</span>
+                </div>
+            </div>
+
+            <!-- TOMBOL -->
+            <div class="btn-group no-print">
+                <button class="btn btn-primary" id="btnHitung"><i class="bi bi-calculator-fill"></i> Buat Tiket</button>
+                <button class="btn btn-send-wa" id="btnSendWA" disabled>
+                    <i class="bi bi-whatsapp"></i> Kirim ke Admin
+                </button>
+            </div>
+
+            <!-- ===== STRUK / TIKET ===== -->
+            <div id="strukContainer">
+                <div class="struk-header">
+                    <h2><i class="bi bi-clipboard-check"></i> TIKET KUNJUNGAN</h2>
+                    <div class="struk-sub">VST-<span id="ticketNumber">A7X9K2M5</span></div>
+                </div>
+                <div class="struk-body" id="strukBody">
+
+                    <div class="struk-item">
+                        <span class="label"><i class="bi bi-person-fill"></i> PIC</span>
+                        <span class="value" id="sNama">-</span>
+                    </div>
+                    <div class="struk-item">
+                        <span class="label"><i class="bi bi-whatsapp"></i> WA PIC</span>
+                        <span class="value" id="sWAPIC">-</span>
+                    </div>
+                    <div class="struk-item">
+                        <span class="label"><i class="bi bi-calendar3"></i> Tanggal & Jam</span>
+                        <span class="value" id="sTanggalJam">-</span>
+                    </div>
+                    <div class="struk-item">
+                        <span class="label"><i class="bi bi-clipboard-check"></i> Tujuan Visit</span>
+                        <span class="value" id="sTujuanVisit">-</span>
+                    </div>
+                    <div class="struk-item">
+                        <span class="label"><i class="bi bi-gear-fill"></i> Tipe Unit</span>
+                        <span class="value" id="sTipeUnit">-</span>
+                    </div>
+                    <div class="struk-item">
+                        <span class="label"><i class="bi bi-geo-alt"></i> Alamat Tujuan</span>
+                        <span class="value" id="sTujuan">-</span>
+                    </div>
+                    <div class="struk-item">
+                        <span class="label"><i class="bi bi-map-fill"></i> Zona</span>
+                        <span class="value" id="sZona">-</span>
+                    </div>
+                    <div class="struk-item">
+                        <span class="label"><i class="bi bi-boxes"></i> Jumlah Unit</span>
+                        <span class="value" id="sQty">-</span>
+                    </div>
+
+                    <div class="struk-item detail">
+                        <span class="label"><i class="bi bi-geo-alt-fill"></i> Dari</span>
+                        <span class="value" style="font-size:11px;max-width:70%;" id="sDari">Jl. Batu Ceper VII RT 08 RW 01 No 18, Sawah Besar, Jakarta Pusat</span>
+                    </div>
+
+                    <div class="struk-item total" style="display:none;">
+                        <span class="label"><i class="bi bi-cash-stack"></i> TOTAL BIAYA</span>
+                        <span class="value" id="sTotal">-</span>
+                    </div>
+
+                </div>
+
+                <div class="struk-footer">
+                    <span><i class="bi bi-check-circle-fill" style="color:#e8a530;"></i> Estimasi Biaya Berdasarkan Zona</span>
+                    <span><i class="bi bi-clock-fill"></i> <span id="sWaktu"></span></span>
+                </div>
+            </div>
+
+            <!-- ===== PEMBAYARAN ===== -->
+            <div class="payment-section" id="paymentSection">
+                <div class="payment-title">
+                    <i class="bi bi-credit-card"></i> Pilih Metode Pembayaran
+                </div>
+                <div class="payment-options">
+                    <button class="pay-btn gopay" data-method="gopay">
+                        <i class="bi bi-wallet2"></i>
+                        GoPay
+                    </button>
+                    <button class="pay-btn dana" data-method="dana">
+                        <i class="bi bi-building"></i>
+                        DANA
+                    </button>
+                    <button class="pay-btn transfer" data-method="transfer">
+                        <i class="bi bi-bank"></i>
+                        Transfer
+                    </button>
+                </div>
+                <div class="payment-confirm" id="paymentConfirm">
+                    <i class="bi bi-check-circle-fill"></i>
+                    Pembayaran via <span id="payMethodText">-</span> berhasil dipilih.
+                    <div class="pay-detail" id="payDetail"></div>
+                </div>
+            </div>
+
+            <!-- ===== TOKEN SECTION ===== -->
+            <div class="token-section" id="tokenSection">
+                <div class="token-title">
+                    <i class="bi bi-shield-lock-fill"></i> Verifikasi Token Tiket
+                </div>
+                <div class="token-status info show" id="tokenInfo">
+                    <i class="bi bi-info-circle"></i> Masukkan token yang diberikan Admin melalui WhatsApp.
+                </div>
+                <div class="token-row">
+                    <input type="text" id="tokenInput" placeholder="Masukkan Token" maxlength="20" />
+                    <button class="btn btn-verify" id="btnVerify">Verifikasi</button>
+                </div>
+                <div class="token-status" id="tokenStatus"></div>
+                <div class="timer-display" id="timerDisplay">
+                    <i class="bi bi-clock"></i> Sisa waktu: <span id="timerCount">300</span> detik
+                </div>
+            </div>
+
+            <!-- ===== DOWNLOAD BUTTON ===== -->
+            <div class="btn-group no-print" id="downloadGroup" style="display:none;">
+                <button class="btn btn-download" id="btnDownload" disabled><i class="bi bi-download"></i> Download Tiket</button>
+                <div class="download-loading" id="downloadLoading">
+                    <i class="bi bi-arrow-repeat"></i> Memproses download...
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
