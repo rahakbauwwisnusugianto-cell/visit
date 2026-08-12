@@ -897,7 +897,7 @@ body {
     word-break: break-word;
 }
 
-/* TOTAL BIAYA DISEMBUNYIKAN */
+/* TOTAL BIAYA DISEMBUNYIKAN (tetap ada untuk JavaScript) */
 .struk-item.total {
     display: none !important;
 }

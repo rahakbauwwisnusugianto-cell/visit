@@ -87,7 +87,7 @@
         if (e.target === this) hideTransferPopup();
     });
 
-    // ===== TOKEN INPUT HANDLER (Auto-Verify) =====
+    // ===== TOKEN INPUT HANDLER =====
     function setupTokenInput(prefix) {
         const inputs = document.querySelectorAll(`#${prefix}TokenGroup .token-input`);
         const errorEl = document.getElementById(`${prefix}TokenError`);
@@ -217,7 +217,7 @@
         document.getElementById('loadingOverlay').classList.remove('show');
     }
 
-    // ===== AFTER PAYMENT - CHANGE UI =====
+    // ===== AFTER PAYMENT =====
     function onTokenVerified() {
         document.getElementById('paymentOptions').style.display = 'none';
         document.getElementById('paymentConfirm').style.display = 'none';
@@ -550,7 +550,7 @@
         }
     });
 
-    // ===== GENERATE 8 CHARACTER RANDOM CODE =====
+    // ===== GENERATE TICKET CODE =====
     function generateTicketCode() {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         let result = '';
@@ -914,7 +914,7 @@
         qtyBadge.textContent = Math.max(1, val);
     });
 
-    // ===== QTY PLUS - CEK FLAG =====
+    // ===== QTY PLUS =====
     qtyPlus.addEventListener('click', function() {
         const current = parseInt(qtyInput.value) || 1;
         const newQty = current + 1;
@@ -1006,6 +1006,8 @@
 
     // ===== GENERATE TIKET =====
     async function generateTicket() {
+        console.log('Generate ticket dipanggil!');
+        
         const namaVal = nama.value.trim();
         const waPICVal = waPIC.value.trim();
         const tanggalVal = tanggal.value;
@@ -1014,6 +1016,14 @@
         const tipeUnitVal = tipeUnit.value;
         const zonaKey = zonaSelect.value;
         const qtyVal = parseInt(qtyInput.value) || 1;
+
+        console.log('Nama:', namaVal);
+        console.log('WA:', waPICVal);
+        console.log('Tanggal:', tanggalVal);
+        console.log('Tujuan Visit:', tujuanVisitVal);
+        console.log('Tipe Unit:', tipeUnitVal);
+        console.log('Zona:', zonaKey);
+        console.log('Qty:', qtyVal);
 
         // ===== VALIDASI =====
         if (!namaVal) {
@@ -1076,6 +1086,7 @@
         
         const tujuanFinal = tujuan.value.trim() || '(tidak diisi)';
 
+        // Cek biaya tambahan jika qty > 5
         if (qtyVal > BATAS_QTY_DASAR && !hasConfirmedExtra) {
             const result = hitungHarga(zonaKey, qtyVal);
             const extra = qtyVal - BATAS_QTY_DASAR;
@@ -1119,6 +1130,7 @@
         selectedPayment = null;
         payBtns.forEach(b => b.classList.remove('active'));
 
+        // Tampilkan tombol Kirim ke Admin
         const waBtn = document.getElementById('btnSendWA');
         waBtn.style.display = 'flex';
         waBtn.disabled = false;
@@ -1141,6 +1153,10 @@
         isDownloaded = false;
 
         showToast('✅ Tiket berhasil dibuat! Pilih metode pembayaran dan kirim ke Admin.', 'success', 5000);
+        
+        // Scroll ke tiket
+        strukContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
         return true;
     }
 
@@ -1353,9 +1369,11 @@
     });
 
     // ===== TOMBOL =====
-    btnHitung.addEventListener('click', async function(e) {
+    // Event listener untuk tombol Buat Tiket
+    btnHitung.addEventListener('click', function(e) {
         e.preventDefault();
-        await generateTicket();
+        console.log('Tombol Buat Tiket diklik!');
+        generateTicket();
     });
 
     btnVerify.addEventListener('click', function(e) {
@@ -1374,5 +1392,10 @@
         e.preventDefault();
         downloadGambar();
     });
+
+    // ===== DEBUG =====
+    console.log('✅ Script.js loaded successfully!');
+    console.log('btnHitung:', btnHitung);
+    console.log('btnSendWA:', btnSendWA);
 
 })();

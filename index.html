@@ -33,7 +33,7 @@
             <div class="qris-merchant-info">
                 <div class="qris-info-row">
                     <span class="qris-info-label">Merchant</span>
-                    <span class="qris-info-value">Atlas Infra Systems, Gambir</span>
+                    <span class="qris-info-value">Atlas Infra Systems</span>
                 </div>
                 <div class="qris-info-row">
                     <span class="qris-info-label">NMDID</span>
@@ -160,7 +160,6 @@
                     Transfer sesuai total biaya dan kirim bukti ke Admin
                 </div>
             </div>
-            <!-- ===== FORM TOKEN 6 KOTAK ===== -->
             <div class="token-form-container">
                 <label class="token-form-label">Masukkan Token Pembayaran</label>
                 <div class="token-input-group" id="transferTokenGroup">
@@ -173,7 +172,6 @@
                 </div>
                 <div class="token-error" id="transferTokenError">Token salah! Silakan coba lagi.</div>
             </div>
-            <!-- Tombol Tutup dihilangkan -->
         </div>
     </div>
 
@@ -300,7 +298,7 @@
                 <div class="payment-method">
                     <h3>Metode Pembayaran</h3>
                     <p><strong>Metode:</strong> <span id="invMetode">-</span></p>
-                    <p><strong>Status:</strong> <span class="status-paid">✅ LUNAS</span></p>
+                    <p><strong>Status:</strong> <span class="status-paid">LUNAS</span></p>
                 </div>
                 <div class="payment-total">
                     <table class="total-table">
@@ -382,8 +380,8 @@
 
             <!-- Form Nama PIC -->
             <div class="form-group">
-                <label><i class="bi bi-person-fill"></i> Nama PIC</label>
-                <input type="text" id="nama" placeholder="Masukkan nama PIC" />
+                <label><i class="bi bi-person-fill"></i> Nama Costumer</label>
+                <input type="text" id="nama" placeholder="Masukkan nama costumer" />
                 <div class="input-hint">
                     <i class="bi bi-info-circle"></i> Person In Charge (Penanggung Jawab)
                 </div>
@@ -392,7 +390,7 @@
             <!-- Form WhatsApp PIC -->
             <div class="form-group">
                 <label><i class="bi bi-whatsapp"></i> Nomor WhatsApp PIC</label>
-                <input type="tel" id="waPIC" placeholder="Contoh: 0812 3456 7890" />
+                <input type="tel" id="waPIC" placeholder="Masukkan nomor PIC" />
                 <div class="input-hint">
                     <i class="bi bi-info-circle"></i> Nomor WhatsApp yang bisa dihubungi
                 </div>
@@ -528,11 +526,11 @@
                 </div>
                 <div class="struk-body">
                     <div class="struk-item">
-                        <span class="label"><i class="bi bi-person-fill"></i> PIC</span>
+                        <span class="label"><i class="bi bi-person-fill"></i> Nama PIC</span>
                         <span class="value" id="sNama">-</span>
                     </div>
                     <div class="struk-item">
-                        <span class="label"><i class="bi bi-whatsapp"></i> WA PIC</span>
+                        <span class="label"><i class="bi bi-whatsapp"></i> Nomor Whatsapp PIC</span>
                         <span class="value" id="sWAPIC">-</span>
                     </div>
                     <div class="struk-item">
@@ -559,7 +557,8 @@
                         <span class="label"><i class="bi bi-boxes"></i> Jumlah Unit</span>
                         <span class="value" id="sQty">-</span>
                     </div>
-                    <div class="struk-item total">
+                    <!-- TOTAL BIAYA (Hidden - untuk JavaScript) -->
+                    <div class="struk-item total" style="display:none;">
                         <span class="label"><i class="bi bi-cash-stack"></i> TOTAL BIAYA</span>
                         <span class="value" id="sTotal">-</span>
                     </div>
