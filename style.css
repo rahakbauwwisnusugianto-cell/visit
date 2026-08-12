@@ -111,7 +111,9 @@ body {
 }
 
 /* ===== OVERLAY ===== */
-.confirm-overlay, .popup-overlay, .qris-overlay {
+.confirm-overlay,
+.popup-overlay,
+.qris-overlay {
     display: none;
     position: fixed;
     top: 0;
@@ -126,7 +128,9 @@ body {
     backdrop-filter: blur(4px);
 }
 
-.confirm-overlay.show, .popup-overlay.show, .qris-overlay.show {
+.confirm-overlay.show,
+.popup-overlay.show,
+.qris-overlay.show {
     display: flex;
     animation: fadeIn 0.3s ease;
 }
@@ -378,7 +382,8 @@ body {
 }
 
 .form-group label .bi { color: #e8a530; font-size: 15px; }
-.form-group label .badge-qty, .form-group label .badge-zona {
+.form-group label .badge-qty,
+.form-group label .badge-zona {
     background: #e8a530;
     color: #1a1a2e;
     font-size: 10px;
@@ -387,7 +392,9 @@ body {
     font-weight: 700;
 }
 
-.form-group input, .form-group textarea, .form-group select {
+.form-group input,
+.form-group textarea,
+.form-group select {
     width: 100%;
     padding: 12px 14px;
     border: 1.5px solid #e2e8f0;
@@ -398,7 +405,9 @@ body {
     color: #1a2634;
 }
 
-.form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
     outline: none;
     border-color: #e8a530;
     background: white;
@@ -604,7 +613,7 @@ body {
 .btn-send-wa:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-send-wa.sent { background: #059669; }
 
-/* ===== BOTTOM BUTTONS (Sejajar) ===== */
+/* ===== BOTTOM BUTTONS ===== */
 .bottom-buttons {
     display: flex;
     gap: 8px;
@@ -634,6 +643,34 @@ body {
     box-shadow: 0 4px 12px rgba(232, 165, 48, 0.3);
 }
 .bottom-buttons .btn-primary:hover { background: #d49520; }
+
+/* ===== TOMBOL BUAT TIKET ===== */
+.btn-create-ticket {
+    background: #e8a530 !important;
+    color: #1a1a2e !important;
+    box-shadow: 0 4px 12px rgba(232, 165, 48, 0.3) !important;
+    font-weight: 700 !important;
+    padding: 13px 16px !important;
+    border: none !important;
+    border-radius: 14px !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    width: 100% !important;
+}
+
+.btn-create-ticket:hover {
+    background: #d49520 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(232, 165, 48, 0.4) !important;
+}
+
+.btn-create-ticket:active {
+    transform: scale(0.97) !important;
+}
 
 .bottom-buttons .btn-send-wa {
     background: #25D366;
@@ -710,7 +747,6 @@ body {
 .payment-options .pay-btn:hover { border-color: #059669; background: #f0fdf4; }
 .payment-options .pay-btn.active { border-color: #059669; background: #d1fae5; color: #065f46; }
 
-/* Payment Logo */
 .pay-logo {
     width: 32px;
     height: 32px;
@@ -861,15 +897,10 @@ body {
     word-break: break-word;
 }
 
+/* TOTAL BIAYA DISEMBUNYIKAN */
 .struk-item.total {
-    display: flex !important;
-    border-top: 2px solid #e8a530;
-    margin-top: 4px;
-    padding-top: 10px;
+    display: none !important;
 }
-
-.struk-item.total .label { color: #1a1a2e; font-weight: 700; }
-.struk-item.total .value { color: #e8a530; font-weight: 800; font-size: 15px; }
 
 .struk-item.detail { font-size: 12px; padding: 3px 0; }
 .struk-item.detail .label { font-size: 12px; color: #8f9bae; }
@@ -1038,7 +1069,6 @@ body {
     color: #1a1a2e;
 }
 
-/* QRIS Logo di Header */
 .qris-logo {
     width: 28px;
     height: 28px;
@@ -1248,22 +1278,6 @@ body {
     font-weight: 800;
     font-size: 15px;
 }
-
-.qris-btn-close-bottom {
-    margin-top: 8px;
-    padding: 8px 32px;
-    background: #e8a530;
-    color: #1a1a2e;
-    border: none;
-    border-radius: 10px;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: 0.2s;
-    width: 100%;
-}
-
-.qris-btn-close-bottom:hover { background: #d49520; }
 
 /* ===== LOADING OVERLAY ===== */
 .loading-overlay {
@@ -1587,7 +1601,7 @@ body {
 @media (max-width: 480px) {
     .logo-ais { width: 40px; height: 40px; }
     .header-text h1 { font-size: 16px; }
-    
+
     .qris-popup { padding: 14px 12px 12px; max-width: 300px; }
     .qris-image-container img { max-width: 160px; }
     .qris-popup-title { font-size: 13px; }
@@ -1595,21 +1609,20 @@ body {
     .qris-logo { width: 22px; height: 22px; }
     .qris-info-row { font-size: 10px; }
     .qris-slogan { font-size: 10px; }
-    .qris-btn-close-bottom { padding: 6px 24px; font-size: 11px; }
     .app-badge { font-size: 8px; padding: 1px 8px; }
-    
+
     .token-input {
         width: 30px;
         height: 34px;
         font-size: 15px;
     }
     .token-input-group { gap: 4px; }
-    
+
     .success-popup { padding: 24px 16px 20px; }
     .success-icon { font-size: 48px; }
     .success-icon .bi { font-size: 48px; }
     .success-popup h2 { font-size: 18px; }
-    
+
     .after-pay-btn {
         font-size: 12px;
         padding: 10px 12px;
@@ -1617,24 +1630,24 @@ body {
     .after-pay-btn .bi {
         font-size: 16px;
     }
-    
+
     .header-badge { font-size: 8px; padding: 3px 8px; }
-    
-    .payment-options .pay-btn { 
-        min-width: 60px; 
-        font-size: 11px; 
-        padding: 8px 10px; 
+
+    .payment-options .pay-btn {
+        min-width: 60px;
+        font-size: 11px;
+        padding: 8px 10px;
     }
-    
+
     .pay-logo {
         width: 28px;
         height: 28px;
     }
-    
+
     .transfer-row {
         font-size: 11px;
     }
-    
+
     .bottom-buttons .btn {
         font-size: 13px;
         padding: 11px 12px;
@@ -1643,24 +1656,43 @@ body {
         font-size: 13px;
         padding: 11px 12px;
     }
-    
+
     .invoice-wrapper { padding: 20px 16px; }
     .invoice-title-area h1 { font-size: 22px; }
     .invoice-logo img { width: 40px; height: 40px; }
     .invoice-company h2 { font-size: 15px; }
     .invoice-table { font-size: 11px; }
-    .invoice-table thead th, .invoice-table tbody td { padding: 6px 8px; }
+    .invoice-table thead th,
+    .invoice-table tbody td { padding: 6px 8px; }
     .invoice-payment { flex-direction: column; gap: 15px; }
     .payment-total { min-width: 100%; }
 }
 
 /* ===== PRINT ===== */
 @media print {
-    body { background: white; padding: 0; margin: 0; }
-    .app-container { border-radius: 0; box-shadow: none; max-width: 100%; }
-    .btn-group, .no-print, .btn, .payment-section, .toast-container, .token-section,
-    .popup-overlay, .confirm-overlay, .qris-overlay, .loading-overlay,
-    .bottom-buttons, .after-payment-buttons, .header-badge {
+    body {
+        background: white;
+        padding: 0;
+        margin: 0;
+    }
+    .app-container {
+        border-radius: 0;
+        box-shadow: none;
+        max-width: 100%;
+    }
+    .btn-group,
+    .no-print,
+    .btn,
+    .payment-section,
+    .toast-container,
+    .token-section,
+    .popup-overlay,
+    .confirm-overlay,
+    .qris-overlay,
+    .loading-overlay,
+    .bottom-buttons,
+    .after-payment-buttons,
+    .header-badge {
         display: none !important;
     }
     #strukContainer {
@@ -1687,7 +1719,10 @@ body {
         max-width: 100%;
     }
     .invoice-divider { border-top: 3px double #e8a530; }
-    .invoice-table thead th { background: #1a1a2e !important; color: white !important; }
+    .invoice-table thead th {
+        background: #1a1a2e !important;
+        color: white !important;
+    }
     .status-paid { color: #22c55e !important; }
     .total-table .grand-total { color: #e8a530 !important; }
 }
